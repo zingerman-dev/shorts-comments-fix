@@ -20,8 +20,9 @@
 // buttons stay invisible and the panels keep the previous short until the next
 // flip. See "Stuck Shorts page" below.
 //
-// And when a comments request fails, the panel's loader never fires again for
-// the following shorts. See "Comments that never start loading" below.
+// And sometimes comments never show up at all: a failed request leaves the
+// panel's loader stuck, or a starved scheduler never draws the answer. See
+// "Comments that never show up" below.
 (() => {
   'use strict';
 
@@ -97,14 +98,15 @@
     return { token, videoId: (token && videoIdFromToken(token)) || urlVideoId };
   }
 
-  // Continuation token -> time it was last requested.
+  // Continuation token -> when it was last requested, and when YouTube last got an answer for it.
   const requestedAt = new Map();
+  const answeredAt = new Map();
 
-  function noteRequest(token, time = performance.now()) {
-    if (requestedAt.size > 200) {
-      for (const [key, at] of requestedAt) if (time - at > 300000) requestedAt.delete(key);
+  function note(times, token, time = performance.now()) {
+    if (times.size > 200) {
+      for (const [key, at] of times) if (time - at > 300000) times.delete(key);
     }
-    requestedAt.set(token, time);
+    times.set(token, time);
     return time;
   }
 
@@ -146,7 +148,9 @@
 
   // Whenever we are unsure, we return the body untouched: never worse than stock YouTube.
   async function forCurrentShort(body, requestJson, template, sentAt, reloads) {
-    if (!requestJson || !body.includes(COMMENTS_TARGET_ID)) return body;
+    if (!requestJson) return body;
+    note(answeredAt, requestJson.continuation);
+    if (!body.includes(COMMENTS_TARGET_ID)) return body;
     const requestedVideoId = videoIdFromToken(requestJson.continuation);
     const panel = currentPanel();
     if (!requestedVideoId || !panel.videoId || requestedVideoId === panel.videoId) return body;
@@ -159,7 +163,7 @@
 
     log(`late comments of ${requestedVideoId}, loading ${panel.videoId} instead`);
     const json = { ...requestJson, continuation: panel.token };
-    const reloadSentAt = noteRequest(panel.token);
+    const reloadSentAt = note(requestedAt, panel.token);
     try {
       const headers = new Headers(template.headers);
       headers.delete('content-encoding');
@@ -175,7 +179,11 @@
   // YouTube reads the body with text(). Clones share the result, since other
   // extensions that wrap fetch (ad blockers) often read a clone instead.
   function guardResponse(response, template, requestJson, sentAt, shared = { body: null }) {
-    if (!response.ok) return response;
+    if (!response.ok) {
+      // An error is an answer too: nothing will be drawn for it.
+      requestJson.then((json) => json && note(answeredAt, json.continuation));
+      return response;
+    }
     const nativeText = response.text;
     const nativeClone = response.clone;
     const text = () =>
@@ -207,7 +215,7 @@
     }
     const sentAt = performance.now();
     const requestJson = readRequestJson(copy).then((json) => {
-      if (json) noteRequest(json.continuation, sentAt);
+      if (json) note(requestedAt, json.continuation, sentAt);
       return json;
     });
     return nativeFetch(request).then((response) => guardResponse(response, request, requestJson, sentAt));
@@ -266,12 +274,14 @@
     }
   };
 
-  // ---- Comments that never start loading -------------------------------------
+  // ---- Comments that never show up ---------------------------------------------
   // The open panel's first loader fires only when it appears on screen. When a
   // comments request fails (YouTube sometimes answers with an error after ~10 s),
-  // that loader stays on screen for the next shorts and never fires again, so
-  // their comments never load. If it sits there for a few seconds with no
-  // request for its token, we fire it the way YouTube does.
+  // that loader stays on screen for the next shorts and never fires again. And
+  // while the scheduler is starved, an answer can arrive and never be drawn. So
+  // when the first loader outlives its answer, we run the work YouTube queued;
+  // if it is still there, or nothing asked for its comments, we fire it the way
+  // YouTube does.
 
   const FIRST_LOADER_SELECTOR =
     `${PANEL_SELECTOR}[visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"] ` +
@@ -279,20 +289,30 @@
   const firedLoaders = new Map(); // token -> times fired
   let waitingLoader = { token: null, checks: 0 };
 
-  function fireStalledLoader() {
+  function checkFirstLoader() {
     const loader = document.querySelector(FIRST_LOADER_SELECTOR);
     const token = loader?.data?.continuationEndpoint?.continuationCommand?.token;
-    // A request for this token in the last 15 s may still be on its way.
-    const stalled = typeof token === 'string' && performance.now() - (requestedAt.get(token) ?? -Infinity) > 15000;
+    const now = performance.now();
+    const requested = requestedAt.get(token) ?? -Infinity;
+    const answered = answeredAt.get(token) ?? -Infinity;
+    // A request gets 15 s to be answered, an answer 1.5 s to be drawn.
+    const stalled = typeof token === 'string' && (answered >= requested ? now - answered > 1500 : now - requested > 15000);
     waitingLoader = stalled
       ? { token, checks: waitingLoader.token === token ? waitingLoader.checks + 1 : 1 }
       : { token: null, checks: 0 };
+    if (!stalled) return;
+    if (waitingLoader.checks === 2 && Number.isFinite(answered) && !unstickDisabled()) {
+      log(runSchedulerIdlePass()
+        ? 'comments arrived but were not shown: ran the work YouTube had queued'
+        : 'comments arrived but were not shown, and the scheduler was not recognised');
+      return;
+    }
     const fired = firedLoaders.get(token) ?? 0;
-    if (!stalled || waitingLoader.checks < 3 || fired >= 2 || typeof loader.triggerContinuation !== 'function') return;
+    if (waitingLoader.checks < 3 || fired >= 2 || typeof loader.triggerContinuation !== 'function') return;
     if (firedLoaders.size > 500) firedLoaders.clear();
     firedLoaders.set(token, fired + 1);
     waitingLoader = { token: null, checks: 0 };
-    log('comments never started loading: fired the loader');
+    log('comments never showed up: fired the loader');
     loader.triggerContinuation();
   }
 
@@ -300,7 +320,7 @@
   setInterval(() => {
     if (!location.pathname.startsWith('/shorts/')) return;
     try {
-      fireStalledLoader();
+      checkFirstLoader();
     } catch (error) {
       log('checking the comments loader failed:', error);
     }

@@ -14,7 +14,7 @@ The mistake also sticks: go back to that short and it shows the wrong comments a
 
 Less often, after a very fast trackpad scroll, the new short is already playing but the like, dislike and comment buttons are gone, and the panels (comments, description) still belong to the previous short until the next scroll.
 
-And sometimes comments stop loading altogether: the panel spins on every short until you reload the page. It starts when a single comments request fails (YouTube occasionally answers with an error after about 10 seconds).
+And sometimes comments never show up and the panel just spins. A single failed comments request (YouTube occasionally answers with an error after about 10 seconds) leaves it spinning on every short until you reload the page, and on a busy page an answer can arrive and never be drawn.
 
 ## Why it happens
 
@@ -29,7 +29,7 @@ That's why simply dropping late responses doesn't work: the panel would keep loa
 
 The vanishing buttons are a separate bug. When the short changes, YouTube hides the button layer (`opacity: 0`) and hands the redraw to its task scheduler at the lowest priority, which only runs when the page is idle. After a very fast scroll (trackpad momentum carries into the next short and snaps back), the scheduler may never get an idle moment, so the redraw, keeping the panel open and loading comments all wait for the next scroll.
 
-The endless spinner after a failed request comes from the same reused loader. A failed request never replaces it, so it stays on screen for the following shorts and never fires again: no comments are requested at all.
+The endless spinner after a failed request comes from the same reused loader. A failed request never replaces it, so it stays on screen for the following shorts and never fires again: no comments are requested at all. An answer that is never drawn is the scheduler again: drawing it waits for an idle moment that doesn't come.
 
 ## How the extension fixes it
 
@@ -43,7 +43,7 @@ If anything can't be recognised (say, YouTube changed the format), the response 
 
 For the vanishing buttons, the extension checks the Shorts page once a second. If navigation has finished but the button layer is still hidden or the comments panel belongs to another short, two checks in a row, it runs one idle pass of YouTube's scheduler. That runs exactly the work YouTube itself had queued. If the scheduler can't be recognised, the extension does nothing.
 
-For comments that never start loading, the same once-a-second check looks at the open panel. If it has shown only its first loader for three seconds and nothing has requested that loader's comments in the last 15 seconds, the extension fires the loader the way YouTube does, at most twice per short.
+For comments that never show up, the same once-a-second check looks at the open panel. If its first loader is still there 1.5 seconds after YouTube got an answer for it, the extension runs one idle pass of the scheduler. If the loader survives that, or nothing has asked for its comments (a request gets 15 seconds), the extension fires the loader the way YouTube does, at most twice per short.
 
 The extension only needs access to `www.youtube.com`. It has no other permissions and sends data nowhere.
 
