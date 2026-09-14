@@ -19,6 +19,9 @@
 // crosses into the next short and snaps back): the new short plays, but its
 // buttons stay invisible and the panels keep the previous short until the next
 // flip. See "Stuck Shorts page" below.
+//
+// And when a comments request fails, the panel's loader never fires again for
+// the following shorts. See "Comments that never start loading" below.
 (() => {
   'use strict';
 
@@ -263,9 +266,45 @@
     }
   };
 
+  // ---- Comments that never start loading -------------------------------------
+  // The open panel's first loader fires only when it appears on screen. When a
+  // comments request fails (YouTube sometimes answers with an error after ~10 s),
+  // that loader stays on screen for the next shorts and never fires again, so
+  // their comments never load. If it sits there for a few seconds with no
+  // request for its token, we fire it the way YouTube does.
+
+  const FIRST_LOADER_SELECTOR =
+    `${PANEL_SELECTOR}[visibility="ENGAGEMENT_PANEL_VISIBILITY_EXPANDED"] ` +
+    'ytd-item-section-renderer #contents > ytd-continuation-item-renderer[is-initial-load]';
+  const firedLoaders = new Map(); // token -> times fired
+  let waitingLoader = { token: null, checks: 0 };
+
+  function fireStalledLoader() {
+    const loader = document.querySelector(FIRST_LOADER_SELECTOR);
+    const token = loader?.data?.continuationEndpoint?.continuationCommand?.token;
+    // A request for this token in the last 15 s may still be on its way.
+    const stalled = typeof token === 'string' && performance.now() - (requestedAt.get(token) ?? -Infinity) > 15000;
+    waitingLoader = stalled
+      ? { token, checks: waitingLoader.token === token ? waitingLoader.checks + 1 : 1 }
+      : { token: null, checks: 0 };
+    const fired = firedLoaders.get(token) ?? 0;
+    if (!stalled || waitingLoader.checks < 3 || fired >= 2 || typeof loader.triggerContinuation !== 'function') return;
+    if (firedLoaders.size > 500) firedLoaders.clear();
+    firedLoaders.set(token, fired + 1);
+    waitingLoader = { token: null, checks: 0 };
+    log('comments never started loading: fired the loader');
+    loader.triggerContinuation();
+  }
+
   let stuckChecks = 0;
   setInterval(() => {
-    if (!location.pathname.startsWith('/shorts/') || unstickDisabled()) return;
+    if (!location.pathname.startsWith('/shorts/')) return;
+    try {
+      fireStalledLoader();
+    } catch (error) {
+      log('checking the comments loader failed:', error);
+    }
+    if (unstickDisabled()) return;
     try {
       stuckChecks = isStuck() ? stuckChecks + 1 : 0;
       if (stuckChecks < 2) return;
