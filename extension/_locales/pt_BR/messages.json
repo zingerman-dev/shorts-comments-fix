@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Shorts Comments Fix para YouTube",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "Mantém o painel de comentários do YouTube Shorts sincronizado com o Short na tela, mesmo quando você rola rápido.",
+    "description": "Short description, at most 132 characters."
+  }
+}

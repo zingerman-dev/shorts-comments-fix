@@ -1,0 +1,32 @@
+{
+  "name": "shorts-comments-fix",
+  "version": "1.1.0",
+  "license": "MIT",
+  "homepage": "https://github.com/zingerman-dev/shorts-comments-fix",
+  "bugs": "https://github.com/zingerman-dev/shorts-comments-fix/issues",
+  "repository": "github:zingerman-dev/shorts-comments-fix",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/flip-test.mjs",
+    "test:baseline": "node tests/flip-test.mjs --no-ext",
+    "store:images": "node scripts/render-store-images.mjs",
+    "pack": "node scripts/pack.mjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/baloo-2": "^5.3.0",
+    "@fontsource-variable/baloo-bhaijaan-2": "^5.3.0",
+    "@fontsource-variable/baloo-da-2": "^5.3.0",
+    "@fontsource-variable/heebo": "^5.3.0",
+    "@fontsource-variable/m-plus-1": "^5.3.0",
+    "@fontsource-variable/noto-sans-arabic": "^5.3.0",
+    "@fontsource-variable/noto-sans-bengali": "^5.3.0",
+    "@fontsource-variable/noto-sans-devanagari": "^5.3.0",
+    "@fontsource-variable/noto-sans-jp": "^5.3.0",
+    "@fontsource-variable/noto-sans-sc": "^5.3.0",
+    "@fontsource-variable/onest": "^5.3.1",
+    "@fontsource-variable/rubik": "^5.3.0",
+    "@fontsource-variable/unbounded": "^5.3.0",
+    "puppeteer-core": "^25.10.0"
+  }
+}

@@ -1,0 +1,14 @@
+Watching YouTube Shorts on a computer with the comments open? Scroll a little too fast and the panel can show comments from a different short, mix comments of several shorts together, or keep showing the wrong comments every time you come back to that short.
+
+Shorts Comments Fix keeps the comments panel matched to the short you're watching.
+
+How it works
+YouTube loads comments in the background. If you move on before they arrive, YouTube puts the late comments into whichever short is open. The extension notices comments that arrive for a short you've already left and loads the comments of the current short instead.
+
+• Also brings back the like and comment buttons when they vanish after a very fast scroll.
+• Works on its own, there is nothing to set up.
+• Runs only on youtube.com and only touches Shorts.
+• Collects no data. It talks only to YouTube, the same way the page itself does.
+• If YouTube changes something the extension doesn't recognise, it stays out of the way and YouTube works as usual.
+
+This extension is not affiliated with or endorsed by YouTube or Google.

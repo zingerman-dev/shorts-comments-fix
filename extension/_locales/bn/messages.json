@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "YouTube-এর জন্য Shorts Comments Fix",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "দ্রুত স্ক্রল করলেও YouTube Shorts-এর মন্তব্যগুলো স্ক্রিনে থাকা ভিডিওর সঙ্গে মিলিয়ে রাখে।",
+    "description": "Short description, at most 132 characters."
+  }
+}

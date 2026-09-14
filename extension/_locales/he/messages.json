@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Shorts Comments Fix ל-YouTube",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "דואג שחלונית התגובות ב-YouTube Shorts תתאים לסרטון שעל המסך, גם כשגוללים מהר.",
+    "description": "Short description, at most 132 characters."
+  }
+}

@@ -1,0 +1,14 @@
+Du schaust dir YouTube Shorts am Computer an und hast die Kommentare geöffnet? Scrollst du etwas zu schnell, kann der Kommentarbereich Kommentare eines anderen Shorts anzeigen, Kommentare mehrerer Shorts vermischen oder jedes Mal wieder die falschen Kommentare zeigen, wenn du zu dem betroffenen Short zurückkehrst.
+
+Shorts Comments Fix sorgt dafür, dass im Kommentarbereich die Kommentare zu dem Short stehen, das du dir gerade ansiehst.
+
+So funktioniert es
+YouTube lädt Kommentare im Hintergrund. Wechselst du zu einem anderen Short, bevor sie da sind, fügt YouTube die verspäteten Kommentare in das gerade geöffnete Short ein. Die Erweiterung erkennt Kommentare, die für ein Short eintreffen, das du bereits verlassen hast, und lädt stattdessen die Kommentare des aktuellen Shorts.
+
+• Holt auch die Buttons „Mag ich“ und „Kommentare“ zurück, wenn sie nach sehr schnellem Scrollen verschwinden.
+• Funktioniert von selbst, es gibt nichts einzurichten.
+• Läuft nur auf youtube.com und greift nur in Shorts ein.
+• Sammelt keine Daten. Die Erweiterung kommuniziert nur mit YouTube, und zwar genauso wie die Seite selbst.
+• Ändert YouTube etwas, das die Erweiterung nicht erkennt, hält sie sich heraus und YouTube funktioniert wie gewohnt.
+
+Diese Erweiterung steht in keiner Verbindung zu YouTube oder Google und wird nicht von ihnen unterstützt.

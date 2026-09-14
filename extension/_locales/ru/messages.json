@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Shorts Comments Fix для YouTube",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "Следит, чтобы в YouTube Shorts показывались комментарии именно того ролика, который на экране, даже когда вы быстро листаете.",
+    "description": "Short description, at most 132 characters."
+  }
+}

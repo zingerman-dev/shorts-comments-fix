@@ -1,0 +1,14 @@
+¿Ves YouTube Shorts en la versión de escritorio con los comentarios abiertos? Si te desplazas un poco rápido, el panel puede mostrar comentarios de otro Short, mezclar comentarios de varios Shorts o seguir mostrando comentarios equivocados cada vez que vuelves a ese Short.
+
+Shorts Comments Fix mantiene el panel de comentarios sincronizado con el Short que estás viendo.
+
+Cómo funciona
+YouTube carga los comentarios en segundo plano. Si pasas a otro Short antes de que lleguen, YouTube coloca esos comentarios tardíos en el Short que esté abierto en ese momento. La extensión detecta los comentarios que llegan para un Short que ya no estás viendo y, en su lugar, carga los comentarios del Short actual.
+
+• También recupera los botones de «Me gusta» y de comentarios cuando desaparecen tras un desplazamiento muy rápido.
+• Funciona sola: no hay nada que configurar.
+• Solo actúa en youtube.com y solo en Shorts.
+• No recopila datos. Solo se comunica con YouTube, igual que la propia página.
+• Si YouTube cambia algo que la extensión no reconoce, no interviene y YouTube funciona como siempre.
+
+Esta extensión no está afiliada a YouTube ni a Google, ni cuenta con su respaldo.

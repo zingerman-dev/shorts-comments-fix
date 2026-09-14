@@ -1,0 +1,14 @@
+Você assiste ao YouTube Shorts no computador com os comentários abertos? Se rolar um pouco rápido demais, o painel pode mostrar comentários de outro Short, misturar comentários de vários Shorts ou continuar mostrando os comentários errados toda vez que você volta a esse Short.
+
+O Shorts Comments Fix mantém o painel de comentários sincronizado com o Short que você está vendo.
+
+Como funciona
+O YouTube carrega os comentários em segundo plano. Se você passar para outro Short antes de eles chegarem, o YouTube coloca esses comentários atrasados no Short que estiver aberto no momento. A extensão percebe os comentários que chegam para um Short que você já deixou e, no lugar deles, carrega os comentários do Short atual.
+
+• Também traz de volta os botões "Gostei" e de comentários quando eles somem depois de uma rolagem muito rápida.
+• Funciona sozinha, não há nada para configurar.
+• Atua apenas no youtube.com e somente nos Shorts.
+• Não coleta dados. Ela se comunica apenas com o YouTube, do mesmo jeito que a própria página.
+• Se o YouTube mudar algo que a extensão não reconhece, ela não interfere e o YouTube funciona normalmente.
+
+Esta extensão não é afiliada ao YouTube nem ao Google, nem endossada por eles.

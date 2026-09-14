@@ -1,0 +1,14 @@
+Vous regardez YouTube Shorts sur ordinateur avec les commentaires ouverts ? Faites défiler un peu trop vite et le panneau peut afficher les commentaires d’un autre Short, mélanger les commentaires de plusieurs Shorts ou continuer à afficher des commentaires qui ne sont pas les bons chaque fois que vous revenez à ce Short.
+
+Shorts Comments Fix fait en sorte que le panneau des commentaires corresponde au Short que vous regardez.
+
+Comment ça marche
+YouTube charge les commentaires en arrière-plan. Si vous passez à un autre Short avant leur arrivée, YouTube place ces commentaires en retard dans le Short ouvert à ce moment-là. L’extension repère les commentaires qui arrivent pour un Short que vous avez déjà quitté et charge à la place ceux du Short en cours.
+
+• Fait aussi réapparaître les boutons « J’aime » et « Commentaires » lorsqu’ils disparaissent après un défilement très rapide.
+• Fonctionne toute seule, rien à configurer.
+• N’agit que sur youtube.com, et uniquement dans les Shorts.
+• Ne collecte aucune donnée. Elle ne communique qu’avec YouTube, comme la page elle-même.
+• Si YouTube change quelque chose que l’extension ne reconnaît pas, elle n’intervient pas et YouTube fonctionne normalement.
+
+Cette extension n’est ni affiliée à YouTube ou à Google, ni approuvée par eux.

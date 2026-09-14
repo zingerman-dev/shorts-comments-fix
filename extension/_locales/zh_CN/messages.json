@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "适用于 YouTube 的 Shorts Comments Fix",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "即使快速滚动，也能让 YouTube Shorts 的评论区与屏幕上的视频保持一致。",
+    "description": "Short description, at most 132 characters."
+  }
+}

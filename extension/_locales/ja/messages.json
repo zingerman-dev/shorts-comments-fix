@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "YouTube 用 Shorts Comments Fix",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "YouTube ショートを素早くスクロールしても、コメント欄を画面上のショートと一致させます。",
+    "description": "Short description, at most 132 characters."
+  }
+}

@@ -1,0 +1,842 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Store graphics</title>
+<style>
+  :root {
+    --red: #FF0033;
+    --red-ink: #C8002B;
+    --ink: #2D0B14;
+    --ink-soft: #6E4A52;
+    --muted: #9A7F85;
+    --paper: #FFF4F5;
+    --blush: #FBE4E8;
+    --line: #E9CFD5;
+    --rose: #F6C9D2;
+    --display: 'Unbounded Variable', 'Arial Black', sans-serif;
+    --text: 'Onest Variable', 'Helvetica Neue', Arial, sans-serif;
+  }
+  /* Unbounded and Onest cover Latin and Cyrillic; other scripts get a headline and a text face of their own.
+     Hindi and Bengali headlines take Baloo's Latin too: next to them Unbounded's "Short" read as an accent. */
+  :lang(ja) { --display: 'Unbounded Variable', 'M PLUS 1 Variable', sans-serif; --text: 'Onest Variable', 'Noto Sans JP Variable', sans-serif; }
+  :lang(zh) { --display: 'Unbounded Variable', 'Noto Sans SC Variable', sans-serif; --text: 'Onest Variable', 'Noto Sans SC Variable', sans-serif; }
+  :lang(hi) { --display: 'Baloo 2 Variable', sans-serif; --text: 'Onest Variable', 'Noto Sans Devanagari Variable', sans-serif; }
+  :lang(bn) { --display: 'Baloo Da 2 Variable', sans-serif; --text: 'Onest Variable', 'Noto Sans Bengali Variable', sans-serif; }
+  :lang(ar) { --display: 'Unbounded Variable', 'Baloo Bhaijaan 2 Variable', sans-serif; --text: 'Onest Variable', 'Noto Sans Arabic Variable', sans-serif; }
+  :lang(he) { --display: 'Unbounded Variable', 'Rubik Variable', sans-serif; --text: 'Onest Variable', 'Heebo Variable', sans-serif; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: var(--text);
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  p, h1, h2, ul { margin: 0; }
+  .asset { position: relative; overflow: hidden; }
+
+  .display {
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .display:is(:lang(ja), :lang(zh), :lang(hi), :lang(bn), :lang(ar), :lang(he)) { letter-spacing: 0; }
+  /* Japanese has no spaces: break lines between phrases, not inside words. */
+  :lang(ja) { word-break: auto-phrase; }
+  .lockup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .lockup img { width: 40px; height: 40px; }
+
+  /* A short: illustration with the caption overlay of a vertical video. */
+  .short {
+    position: relative;
+    width: 270px;
+    height: 480px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 22px 44px -20px rgba(45, 11, 20, 0.5);
+  }
+  .short > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .short .shade {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 46%;
+    background: linear-gradient(rgba(24, 6, 11, 0), rgba(24, 6, 11, 0.74));
+  }
+  .short .caption { position: absolute; inset-inline: 16px 58px; bottom: 18px; color: #fff; }
+  .short .channel { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .short .channel i { width: 24px; height: 24px; border-radius: 50%; background: #FFD28A; }
+  .short .title { font-size: 15px; font-weight: 500; line-height: 1.3; }
+  .short .actions { position: absolute; inset-inline-end: 12px; bottom: 20px; display: grid; gap: 12px; }
+  .short .actions i {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.24);
+    display: grid;
+    place-items: center;
+  }
+  .short .actions svg { width: 18px; height: 18px; }
+  .short.mini { width: 132px; height: 235px; border-radius: 16px; box-shadow: none; }
+  .short.mini .caption, .short.mini .actions { display: none; }
+
+  /* Comments panel */
+  .panel {
+    height: 480px;
+    border-radius: 20px;
+    background: #fff;
+    color: var(--ink);
+    padding: 20px 20px 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 20px; font-size: 18px; font-weight: 700; }
+  .panel-head span { font-size: 15px; font-weight: 400; color: var(--muted); }
+  .comments { list-style: none; padding: 0; display: grid; gap: 18px; align-content: start; flex: 1; }
+  .comment { display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .meta { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .meta span { margin-inline-start: 6px; font-weight: 400; color: var(--muted); }
+  .text { font-size: 16px; line-height: 1.35; }
+  .note { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .note .short.mini { flex: none; width: 26px; height: 46px; border-radius: 6px; }
+  .note img { flex: none; width: 30px; height: 30px; }
+
+  .panel.wrong { background: rgba(255, 255, 255, 0.55); border: 2px dashed var(--line); }
+  .panel.wrong .comments { opacity: 0.4; }
+  .panel.wrong .note { color: var(--ink-soft); }
+  .panel.right { border: 2px solid var(--red); }
+  .panel.right .note { color: var(--red-ink); }
+
+  /* Screenshot 1: one short, the comments it gets without and with the extension. */
+  .s1 { width: 1280px; height: 800px; padding: 56px 64px 0; }
+  .s1 header { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; }
+  .s1 h1 { font-size: 46px; line-height: 1.12; max-width: 800px; }
+  :lang(ru) .s1 h1, :lang(ru) .s2 h1 { font-size: 40px; max-width: 870px; }
+  .s1 .lockup { margin-top: 6px; }
+  .s1 .stage {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 236px;
+    display: grid;
+    grid-template-columns: 330px 60px 270px 60px 330px;
+    justify-content: center;
+  }
+  .s1 .state { height: 20px; margin-bottom: 12px; font-size: 16px; font-weight: 600; }
+  .s1 .state.wrong { color: var(--muted); }
+  .s1 .state.right { color: var(--red-ink); }
+  .link { position: relative; }
+  .link::before, .link::after { content: ''; position: absolute; top: 271px; }
+  .link.right::before { left: 0; right: 0; border-top: 3px solid var(--red); }
+  .link.wrong::before { left: 0; width: 34%; border-top: 3px dashed var(--muted); }
+  .link.wrong::after { right: 0; width: 34%; border-top: 3px dashed var(--muted); }
+
+  /* Screenshot 2: the sequence in three scenes. */
+  .s2 { width: 1280px; height: 800px; padding: 56px 64px 0; }
+  .s2 header { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; }
+  .s2 h1 { font-size: 46px; line-height: 1.12; }
+  .s2 .sub { margin-top: 14px; font-size: 20px; line-height: 1.4; color: var(--ink-soft); }
+  .steps {
+    position: absolute;
+    left: 64px;
+    right: 64px;
+    top: 222px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+  }
+  .scene { position: relative; height: 350px; border-radius: 24px; background: var(--blush); overflow: hidden; }
+  .scene .short.mini { position: absolute; inset-inline-start: 62px; width: 112px; height: 199px; }
+  .scene .prev { top: -44px; opacity: 0.5; }
+  .scene .current { top: 167px; }
+  .step .num { margin: 22px 0 8px; font-family: 'Unbounded Variable', var(--display); font-size: 20px; color: var(--red-ink); }
+  .step p { font-size: 20px; line-height: 1.4; max-width: 340px; }
+  .bubble {
+    position: absolute;
+    inset-inline-start: 192px;
+    width: 128px;
+    padding: 11px 13px;
+    border-radius: 14px;
+    background: #fff;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .bubble::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -6px;
+    top: 16px;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: #fff;
+    transform: rotate(45deg);
+  }
+  .bubble.loading { top: 46px; width: 74px; display: flex; gap: 7px; }
+  .bubble.loading i { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+  .bubble.late { top: 208px; color: var(--ink-soft); }
+  .bubble.own { top: 208px; box-shadow: 0 0 0 2px var(--red); }
+  .bubble .mark { position: absolute; inset-inline-end: -17px; top: -19px; width: 36px; height: 36px; }
+  .mark.x { width: 28px; height: 28px; inset-inline-end: -11px; top: -13px; border-radius: 50%; background: var(--ink-soft); display: grid; place-items: center; }
+  .trail { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+  [dir='rtl'] .trail { transform: scaleX(-1); }
+  .facts {
+    position: absolute;
+    left: 64px;
+    right: 64px;
+    bottom: 46px;
+    display: flex;
+    gap: 44px;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+  .facts span { display: flex; align-items: center; gap: 10px; }
+  .facts svg { width: 20px; height: 20px; flex: none; }
+
+  /* Promo tiles */
+  .promo-small {
+    width: 440px;
+    height: 280px;
+    padding: 0 30px;
+    background: var(--ink);
+    color: #fff;
+    display: grid;
+    grid-template-columns: 112px 1fr;
+    gap: 22px;
+    align-items: center;
+  }
+  .promo-small > img { width: 112px; height: 112px; }
+  .promo-small h2 { font-size: 24px; line-height: 1.18; margin-bottom: 12px; }
+  .promo-small .tagline { font-size: 16px; line-height: 1.35; color: var(--rose); }
+
+  .promo-marquee { width: 1400px; height: 560px; padding: 70px 80px; background: var(--ink); color: #fff; }
+  .promo-marquee > h2 { margin: 40px 0 20px; font-size: 44px; line-height: 1.14; max-width: 560px; }
+  :lang(ru) .promo-marquee > h2 { font-size: 40px; max-width: 570px; }
+  .promo-marquee > .tagline { font-size: 21px; line-height: 1.45; color: var(--rose); max-width: 520px; }
+  .promo-marquee .stage {
+    position: absolute;
+    right: 80px;
+    top: 40px;
+    display: grid;
+    grid-template-columns: 270px 56px 330px;
+  }
+  .promo-marquee .link::before { top: 239px; }
+</style>
+</head>
+<body>
+<main id="root"></main>
+<script>
+  const COPY = {
+    en: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'Comments that match the short you’re watching',
+      without: 'Without the extension',
+      with: 'With Shorts Comments Fix',
+      comments: 'Comments',
+      count: '1.2K',
+      channel: '@woodshop.kid',
+      shortTitle: 'Building a birdhouse in 60 seconds',
+      wrongNote: 'These comments belong to another short',
+      rightNote: 'Comments of this short',
+      wrong: [
+        ['mila.sketches', '2 days ago', 'What a cute cat 😍'],
+        ['tomasz', '5 days ago', 'This cat is pure chaos'],
+        ['anna_k', '2 weeks ago', 'My cat does exactly the same thing'],
+        ['leo.draws', '2 weeks ago', 'Is that a Maine Coon?'],
+      ],
+      right: [
+        ['dad_builds', '1 day ago', 'Made one with my son, birds moved in on day two 🐦'],
+        ['june.p', '3 days ago', 'What size is the entrance hole?'],
+        ['woodshop_ro', '4 days ago', 'Use screws, not nails. Trust me'],
+        ['pia.garden', '2 weeks ago', 'We painted ours yellow, the kids love it'],
+      ],
+      late: 'What a cute cat 😍',
+      own: 'What size is the entrance hole?',
+      s2Title: 'Scroll as fast as you like',
+      s2Sub: 'What happens when you flip before the comments load',
+      steps: [
+        'You flip to the next short while its comments are still loading',
+        'YouTube shows the late comments in the new short',
+        'The extension loads the comments of the short on screen instead',
+      ],
+      facts: ['Works only on youtube.com', 'Collects no data', 'Nothing to set up'],
+      tagline: 'Comments that match the short you’re watching',
+      marquee: 'Comments that match the short you’re watching',
+      marqueeSub: 'Scroll YouTube Shorts as fast as you like: the comments panel keeps up.',
+    },
+    ru: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'Комментарии именно того ролика, который вы смотрите',
+      without: 'Без расширения',
+      with: 'С Shorts Comments Fix',
+      comments: 'Комментарии',
+      count: '1,2 тыс.',
+      channel: '@masterskaya.kid',
+      shortTitle: 'Скворечник за 60 секунд',
+      wrongNote: 'Это комментарии другого ролика',
+      rightNote: 'Комментарии этого ролика',
+      wrong: [
+        ['mila.sketches', '2 дня назад', 'Какой милый котик 😍'],
+        ['tomas', '5 дней назад', 'Этот кот просто хаос'],
+        ['anna_k', '2 недели назад', 'Мой кот делает точно так же'],
+        ['leo.draws', '2 недели назад', 'Это мейн-кун?'],
+      ],
+      right: [
+        ['papa_masterit', '1 день назад', 'Сделали с сыном, птицы заселились на второй день 🐦'],
+        ['june.p', '3 дня назад', 'А какой диаметр летка?'],
+        ['stolyarka', '4 дня назад', 'Лучше на саморезы, а не на гвозди'],
+        ['pia.sad', '2 недели назад', 'Покрасили в жёлтый, дети в восторге'],
+      ],
+      late: 'Какой милый котик 😍',
+      own: 'А какой диаметр летка?',
+      s2Title: 'Листайте как угодно быстро',
+      s2Sub: 'Что происходит, если перелистнуть раньше, чем загрузятся комментарии',
+      steps: [
+        'Вы перелистываете ролик, пока его комментарии ещё грузятся',
+        'YouTube показывает запоздавшие комментарии в новом ролике',
+        'Расширение вместо них загружает комментарии ролика на экране',
+      ],
+      facts: ['Работает только на youtube.com', 'Не собирает данные', 'Ничего не нужно настраивать'],
+      tagline: 'Комментарии именно того ролика, который вы смотрите',
+      marquee: 'Комментарии именно того ролика, который вы смотрите',
+      marqueeSub: 'Листайте YouTube Shorts как угодно быстро — панель комментариев не отстанет.',
+    },
+    es: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'Comentarios del mismo Short que estás viendo',
+      without: 'Sin la extensión',
+      with: 'Con Shorts Comments Fix',
+      comments: 'Comentarios',
+      count: '1,2 K',
+      channel: '@mini.carpintero',
+      shortTitle: 'Construyo una casita para pájaros en 60 segundos',
+      wrongNote: 'Estos comentarios son de otro Short',
+      rightNote: 'Comentarios de este Short',
+      wrong: [
+        ['mila.dibuja', 'hace 2 días', 'Qué gatito tan bonito 😍'],
+        ['tomas_rv', 'hace 5 días', 'Este gato es un terremoto'],
+        ['ana_k', 'hace 2 semanas', 'Mi gata hace justo lo mismo'],
+        ['leo.garabatos', 'hace 2 semanas', '¿Es un persa?'],
+      ],
+      right: [
+        ['papa.de.mateo', 'hace 1 día', 'Hicimos una con mi hijo y a los dos días ya tenía inquilinos 🐦'],
+        ['juli.p', 'hace 3 días', '¿Cuánto mide el agujero?'],
+        ['taller_ramos', 'hace 4 días', 'Tornillos, no clavos. Créeme'],
+        ['pia.jardin', 'hace 2 semanas', 'Pintamos la nuestra de amarillo y a los niños les encanta'],
+      ],
+      late: 'Qué gatito tan bonito 😍',
+      own: '¿Cuánto mide el agujero?',
+      s2Title: 'Desplázate a toda velocidad',
+      s2Sub: 'Qué pasa si cambias de Short antes de que se carguen los comentarios',
+      steps: [
+        'Pasas al siguiente Short mientras aún se cargan los comentarios',
+        'YouTube muestra en el nuevo Short los comentarios tardíos',
+        'La extensión carga los comentarios del Short que sí está en pantalla',
+      ],
+      facts: ['Solo actúa en youtube.com', 'No recopila datos', 'Nada que configurar'],
+    },
+    fr: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'Les commentaires du Short que vous regardez',
+      without: 'Sans l’extension',
+      with: 'Avec Shorts Comments Fix',
+      comments: 'Commentaires',
+      count: '1,2 k',
+      channel: '@copeaux.et.cie',
+      shortTitle: 'Fabriquer un nichoir en 60 secondes',
+      wrongNote: 'Ces commentaires viennent d’un autre Short',
+      rightNote: 'Les commentaires de ce Short',
+      wrong: [
+        ['mila.croquis', 'il y a 2 jours', 'Trop mignon ce chat 😍'],
+        ['thomas_92', 'il y a 5 jours', 'Ce chat, c’est le chaos incarné'],
+        ['ines_k', 'il y a 2 semaines', 'Mon chat fait exactement la même chose'],
+        ['leo.dessine', 'il y a 2 semaines', 'C’est un maine coon ?'],
+      ],
+      right: [
+        ['papa_bricole', 'il y a 1 jour', 'Fait avec mon fils, adopté par des mésanges en 2 jours 🐦'],
+        ['juliette.p', 'il y a 3 jours', 'Le trou d’envol fait combien ?'],
+        ['atelier_bzh', 'il y a 4 jours', 'Des vis, pas de clous. Crois-moi'],
+        ['lou.jardin', 'il y a 2 semaines', 'On a peint le nôtre en jaune, les enfants adorent'],
+      ],
+      late: 'Trop mignon ce chat 😍',
+      own: 'Le trou d’envol fait combien ?',
+      s2Title: 'Faites défiler à toute vitesse',
+      s2Sub: 'Ce qui se passe si vous changez de Short pendant le chargement des commentaires',
+      steps: [
+        'Vous passez au Short suivant avant l’arrivée des commentaires',
+        'YouTube affiche les commentaires en retard dans le nouveau Short',
+        'L’extension charge à la place les commentaires du Short à l’écran',
+      ],
+      facts: ['N’agit que sur youtube.com', 'Ne collecte aucune donnée', 'Rien à configurer'],
+    },
+    de: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'Kommentare zu dem Short, das du dir gerade ansiehst',
+      without: 'Ohne die Erweiterung',
+      with: 'Mit Shorts Comments Fix',
+      comments: 'Kommentare',
+      count: '1200',
+      channel: '@holzwerkstatt.kid',
+      shortTitle: 'Vogelhaus bauen in 60 Sekunden',
+      wrongNote: 'Diese Kommentare gehören zu einem anderen Short',
+      rightNote: 'Kommentare zu diesem Short',
+      wrong: [
+        ['mila.skizzen', 'vor 2 Tagen', 'Was für eine süße Katze 😍'],
+        ['tobi93', 'vor 5 Tagen', 'Die Katze ist das reinste Chaos'],
+        ['anna_k', 'vor 2 Wochen', 'Meine Katze macht genau dasselbe'],
+        ['leo.zeichnet', 'vor 2 Wochen', 'Ist das eine Britisch Kurzhaar?'],
+      ],
+      right: [
+        ['papa_baut', 'vor 1 Tag', 'Mit meinem Sohn nachgebaut, am 2. Tag zogen Meisen ein 🐦'],
+        ['jule.p', 'vor 3 Tagen', 'Wie groß ist das Loch?'],
+        ['holzwurm_ben', 'vor 4 Tagen', 'Schrauben, nie Nägel. Glaub mir'],
+        ['pia.garten', 'vor 2 Wochen', 'Wir haben unseres gelb angemalt, die Kinder lieben es'],
+      ],
+      late: 'Was für eine süße Katze 😍',
+      own: 'Wie groß ist das Loch?',
+      s2Title: 'Scrolle, so schnell du willst',
+      s2Sub: 'Was passiert, wenn du weiterscrollst, bevor die Kommentare geladen sind',
+      steps: [
+        'Du scrollst zum nächsten Short, während die Kommentare laden',
+        'YouTube zeigt die verspäteten Kommentare im neuen Short an',
+        'Die Erweiterung lädt stattdessen die Kommentare des neuen Shorts',
+      ],
+      facts: ['Läuft nur auf youtube.com', 'Sammelt keine Daten', 'Nichts einzurichten'],
+    },
+    pt_BR: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'Os comentários do Short que você está vendo',
+      without: 'Sem a extensão',
+      with: 'Com o Shorts Comments Fix',
+      comments: 'Comentários',
+      count: '1,2 mil',
+      channel: '@marceneiro.mirim',
+      shortTitle: 'Casinha para passarinhos em 60 segundos',
+      wrongNote: 'Comentários de outro Short',
+      rightNote: 'Comentários deste Short',
+      wrong: [
+        ['mila.rabiscos', 'há 2 dias', 'Que gatinho mais fofo 😍'],
+        ['tiago.bh', 'há 5 dias', 'Esse gato é o caos em pessoa'],
+        ['anacarol_', 'há 2 semanas', 'Meu gato faz igualzinho kkkk'],
+        ['leo.desenha', 'há 2 semanas', 'Qual a raça? É persa?'],
+      ],
+      right: [
+        ['pai_faztudo', 'há 1 dia', 'Fiz com meu filho, em dois dias já tinha morador 🐦'],
+        ['ju.artesanato', 'há 3 dias', 'Qual a medida do furo?'],
+        ['ze_marceneiro', 'há 4 dias', 'Parafuso, não prego. Confia'],
+        ['jardim.da.bia', 'há 2 semanas', 'Pintamos a nossa de amarelo, as crianças amaram'],
+      ],
+      late: 'Que gatinho mais fofo 😍',
+      own: 'Qual a medida do furo?',
+      s2Title: 'Role o mais rápido que quiser',
+      s2Sub: 'O que acontece se você rolar antes de os comentários carregarem',
+      steps: [
+        'Você passa para o próximo Short enquanto os comentários carregam',
+        'O YouTube mostra os comentários atrasados no novo Short',
+        'No lugar deles, a extensão carrega os comentários do Short na tela',
+      ],
+      facts: ['Funciona apenas no youtube.com', 'Não coleta dados', 'Nada para configurar'],
+    },
+    id: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'Komentar sesuai Shorts yang sedang Anda tonton',
+      without: 'Tanpa ekstensi',
+      with: 'Dengan Shorts Comments Fix',
+      comments: 'Komentar',
+      count: '1,2 rb',
+      channel: '@tukangkayu.cilik',
+      shortTitle: 'Membuat rumah burung dalam 60 detik',
+      wrongNote: 'Ini komentar dari video Shorts lain',
+      rightNote: 'Komentar video Shorts ini',
+      wrong: [
+        ['salsa.doodle', '2 hari yang lalu', 'Gemes banget kucingnya 😍'],
+        ['dimas.pr', '5 hari yang lalu', 'Kucing oren emang barbar'],
+        ['dewi_k', '2 minggu yang lalu', 'Kucingku juga persis kayak gini'],
+        ['raka.draws', '2 minggu yang lalu', 'Itu kucing persia ya?'],
+      ],
+      right: [
+        ['ayah_ngoprek', '1 hari yang lalu', 'Bikin bareng anak, hari kedua udah ada burungnya 🐦'],
+        ['nia.p', '3 hari yang lalu', 'Lubangnya berapa cm?'],
+        ['bengkel.jati', '4 hari yang lalu', 'Pakai sekrup deh, jangan paku'],
+        ['rina.berkebun', '2 minggu yang lalu', 'Kami cat kuning, anak-anak suka banget'],
+      ],
+      late: 'Gemes banget kucingnya 😍',
+      own: 'Lubangnya berapa cm?',
+      s2Title: 'Gulir secepat yang Anda mau',
+      s2Sub: 'Apa yang terjadi jika Anda menggulir sebelum komentar selesai dimuat',
+      steps: [
+        'Anda pindah ke video berikutnya saat komentar masih dimuat',
+        'YouTube menampilkan komentar yang terlambat di video Shorts baru',
+        'Sebagai gantinya, ekstensi memuat komentar video Shorts di layar',
+      ],
+      facts: ['Hanya berjalan di youtube.com', 'Tidak mengumpulkan data', 'Tidak ada yang perlu diatur'],
+    },
+    ja: {
+      brand: 'Shorts Comments Fix',
+      s1Title: '今見ているショートとコメントが一致',
+      without: '拡張機能なし',
+      with: 'Shorts Comments Fix あり',
+      comments: 'コメント',
+      count: '1200',
+      channel: '@chibi.daiku',
+      shortTitle: '60秒で巣箱を作ってみた',
+      wrongNote: 'これは別のショートのコメントです',
+      rightNote: 'このショートのコメント',
+      wrong: [
+        ['mika.illust', '2 日前', 'この猫ちゃん、可愛すぎる😍'],
+        ['taku0925', '5 日前', 'やりたい放題で笑った'],
+        ['yuka_k', '2 週間前', 'うちの猫も全く同じことするｗ'],
+        ['ren.sketch', '2 週間前', 'マンチカンですか？'],
+      ],
+      right: [
+        ['tsukuru.papa', '1 日前', '息子と作ったら、2日目にはもう鳥が入居してました🐦'],
+        ['nana.t', '3 日前', '入り口の直径は何ミリですか？'],
+        ['mokkou_ken', '4 日前', '釘よりビス一択。経験者は語る'],
+        ['hana.garden', '2 週間前', 'うちは黄色に塗ったんですけど、子どもたちのお気に入りです'],
+      ],
+      late: 'この猫ちゃん、可愛すぎる😍',
+      own: '入り口の直径は何ミリですか？',
+      s2Title: '高速スクロールも思いのまま',
+      s2Sub: 'コメントの読み込みが終わる前にスクロールすると、何が起きるのか',
+      steps: [
+        'コメントが読み込まれている途中で、次のショートへ移ります',
+        'YouTube が遅れて届いたコメントを移った先のショートに表示します',
+        '拡張機能が、画面上にあるショートのコメントを代わりに読み込みます',
+      ],
+      facts: ['youtube.com でのみ動作', 'データ収集なし', '設定不要'],
+    },
+    zh_CN: {
+      brand: 'Shorts Comments Fix',
+      s1Title: '看哪个视频，就显示哪个视频的评论',
+      without: '不使用扩展',
+      with: '使用 Shorts Comments Fix',
+      comments: '评论',
+      count: '1200',
+      channel: '@mugong.xiaozi',
+      shortTitle: '60 秒做一个小鸟屋',
+      wrongNote: '这些评论属于另一个视频',
+      rightNote: '这个视频的评论',
+      wrong: [
+        ['tangyuan.huahua', '2天前', '天哪，猫猫也太可爱了😍'],
+        ['chenhao_98', '5天前', '这猫简直是混世魔王'],
+        ['juzi.mama', '2周前', '我家主子也天天这么干'],
+        ['xiaoyu.draws', '2周前', '这是金渐层吗？'],
+      ],
+      right: [
+        ['laoba_mugong', '1天前', '和儿子照着做了一个，第二天就有小鸟入住了🐦'],
+        ['qingqing.z', '3天前', '请问洞口开多大合适？'],
+        ['zhou.shifu', '4天前', '听我一句劝，用螺丝别用钉子'],
+        ['tiantian.huayuan', '2周前', '我家的刷成了黄色，孩子们超爱'],
+      ],
+      late: '天哪，猫猫也太可爱了😍',
+      own: '请问洞口开多大合适？',
+      s2Title: '尽情滚动，想多快就多快',
+      s2Sub: '评论还没加载完就切到别的视频，会发生什么？',
+      steps: ['评论还在加载，你就滚动到了下一个 Shorts 短视频', 'YouTube 在新视频里显示迟到的评论', '而本扩展则会改为加载屏幕上这个视频自己的评论'],
+      facts: ['仅在 youtube.com 上运行', '不收集任何数据', '无需任何设置'],
+    },
+    hi: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'उसी Short की टिप्पणियाँ, जिसे आप देख रहे हैं',
+      without: 'एक्सटेंशन के बिना',
+      with: 'Shorts Comments Fix के साथ',
+      comments: 'टिप्पणियां',
+      count: '1.2 हज़ार',
+      channel: '@karigar.kid',
+      shortTitle: '60 सेकंड में बनाया बर्ड हाउस',
+      wrongNote: 'ये टिप्पणियाँ किसी दूसरे Short की हैं',
+      rightNote: 'इसी Short की टिप्पणियाँ',
+      wrong: [
+        ['riya.sketches', '2 दिन पहले', 'अरे, कितनी प्यारी बिल्ली है 😍'],
+        ['tanmay_v', '5 दिन पहले', 'ये बिल्ली तो आफत की पुड़िया है'],
+        ['megha_k', '2 सप्ताह पहले', 'मेरी बिल्ली भी बिल्कुल ऐसा ही करती है'],
+        ['kabir.draws', '2 सप्ताह पहले', 'ये पर्शियन है क्या?'],
+      ],
+      right: [
+        ['papa_builds', '1 दिन पहले', 'बेटे के साथ बनाया, दूसरे ही दिन चिड़िया रहने आ गई 🐦'],
+        ['ananya_p', '3 दिन पहले', 'छेद कितना बड़ा रखना है?'],
+        ['raju.woodworks', '4 दिन पहले', 'कील नहीं, पेंच लगाना। यकीन मानो'],
+        ['pooja.garden', '2 सप्ताह पहले', 'हमने अपने वाले को पीला पेंट किया है, बच्चों को बहुत पसंद है'],
+      ],
+      late: 'अरे, कितनी प्यारी बिल्ली है 😍',
+      own: 'छेद कितना बड़ा रखना है?',
+      s2Title: 'जितनी तेज़ी से चाहें, स्क्रॉल करें',
+      s2Sub: 'अगर टिप्पणियाँ लोड होने से पहले आप दूसरे Short पर चले जाएँ, तो क्या होता है',
+      steps: [
+        'टिप्पणियाँ अभी लोड हो ही रही होती हैं कि आप अगले Short पर चले जाते हैं',
+        'YouTube देर से आई टिप्पणियाँ नए Short में दिखा देता है',
+        'एक्सटेंशन उनकी जगह स्क्रीन पर चल रहे Short की टिप्पणियाँ लोड करता है',
+      ],
+      facts: ['केवल youtube.com पर काम करता है', 'कोई डेटा इकट्ठा नहीं करता', 'कुछ भी सेट करने की ज़रूरत नहीं'],
+    },
+    ar: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'تعليقات تطابق الفيديو الذي تشاهده',
+      without: 'بدون الإضافة',
+      with: 'مع Shorts Comments Fix',
+      comments: 'التعليقات',
+      count: '1.2 ألف',
+      channel: '@warsha.kid',
+      shortTitle: 'صنع بيت عصافير في 60 ثانية',
+      wrongNote: 'هذه تعليقات فيديو آخر',
+      rightNote: 'تعليقات هذا الفيديو',
+      wrong: [
+        ['noor.sketches', 'قبل يومين', 'ما أحلى هالقطة الصغيرة 😍'],
+        ['karim_89', 'قبل 5 أيام', 'قطة فوضوية بامتياز'],
+        ['reem.hs', 'قبل أسبوعين', 'نفس حركات قطتي بالضبط'],
+        ['yazan.draws', 'قبل أسبوعين', 'نوعها شيرازي؟'],
+      ],
+      right: [
+        ['abu_yamen.diy', 'قبل يوم واحد', 'صنعت واحد مع ابني، والعصافير سكنت فيه من ثاني يوم 🐦'],
+        ['joud.s', 'قبل 3 أيام', 'كم مقاس فتحة الدخول؟'],
+        ['khashab_pro', 'قبل 4 أيام', 'استخدم براغي بدل المسامير، صدقني'],
+        ['salma.garden', 'قبل أسبوعين', 'دهناه بالأصفر، والأطفال يحبونه'],
+      ],
+      late: 'ما أحلى هالقطة الصغيرة 😍',
+      own: 'كم مقاس فتحة الدخول؟',
+      s2Title: 'مرّر بالسرعة التي تريدها',
+      s2Sub: 'ماذا يحدث إذا انتقلت إلى فيديو آخر قبل تحميل التعليقات',
+      steps: [
+        'تنتقل إلى الفيديو التالي والتعليقات لا تزال قيد التحميل',
+        'يعرض YouTube هذه التعليقات المتأخرة في الفيديو الجديد',
+        'تحمّل الإضافة بدلًا منها تعليقات الفيديو المعروض على الشاشة',
+      ],
+      facts: ['تعمل على youtube.com فقط', 'لا تجمع أي بيانات', 'لا تحتاج إلى أي إعداد'],
+    },
+    bn: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'যে Short দেখছেন, মন্তব্যও ঠিক সেটিরই',
+      without: 'এক্সটেনশন ছাড়া',
+      with: 'Shorts Comments Fix সহ',
+      comments: 'মন্তব্য',
+      count: '1.2 হা',
+      channel: '@khude.mistri',
+      shortTitle: '60 সেকেন্ডে বানিয়ে ফেললাম পাখির বাসা',
+      wrongNote: 'এগুলো অন্য একটি Short-এর মন্তব্য',
+      rightNote: 'এই Short-এর মন্তব্য',
+      wrong: [
+        ['mim.sketches', '2 দিন আগে', 'বিড়ালটা কী কিউট 😍'],
+        ['shuvo_07', '5 দিন আগে', 'এই বিড়াল তো পুরো বিচ্ছু'],
+        ['nusrat.k', '2 সপ্তাহ আগে', 'আমার বিড়ালও ঠিক এটাই করে'],
+        ['arif.draws', '2 সপ্তাহ আগে', 'এটা কি পার্সিয়ান?'],
+      ],
+      right: [
+        ['baba_diy', '1 দিন আগে', 'ছেলের সাথে বানিয়েছি, দ্বিতীয় দিনেই পাখি চলে এসেছে 🐦'],
+        ['tithi.p', '3 দিন আগে', 'ঢোকার ফুটোটা কত বড়?'],
+        ['kather_kaj', '4 দিন আগে', 'পেরেক না, স্ক্রু লাগান। ঠেকে শিখেছি'],
+        ['pia.bagan', '2 সপ্তাহ আগে', 'আমাদেরটা হলুদ রং করেছি, বাচ্চারা খুশিতে আটখানা'],
+      ],
+      late: 'বিড়ালটা কী কিউট 😍',
+      own: 'ঢোকার ফুটোটা কত বড়?',
+      s2Title: 'যত দ্রুত চান স্ক্রল করুন',
+      s2Sub: 'মন্তব্য আসার আগেই অন্য Short-এ চলে গেলে কী হয়',
+      steps: [
+        'মন্তব্য লোড হওয়ার মাঝেই আপনি পরের Short-এ স্ক্রল করেন',
+        'YouTube দেরিতে আসা মন্তব্যগুলো নতুন Short-এ দেখিয়ে দেয়',
+        'এক্সটেনশনটি তার বদলে স্ক্রিনে থাকা Short-এর মন্তব্য লোড করে',
+      ],
+      facts: ['শুধু youtube.com-এ কাজ করে', 'কোনো ডেটা সংগ্রহ করে না', 'কিছু সেট করতে হয় না'],
+    },
+    he: {
+      brand: 'Shorts Comments Fix',
+      s1Title: 'תגובות שמתאימות לסרטון שבו אתם צופים',
+      without: 'בלי התוסף',
+      with: 'עם Shorts Comments Fix',
+      comments: 'תגובות',
+      count: '1.2K',
+      channel: '@nagariya.kid',
+      shortTitle: 'בונים בית לציפורים ב-60 שניות',
+      wrongNote: 'התגובות האלה שייכות לסרטון אחר',
+      rightNote: 'התגובות של הסרטון הזה',
+      wrong: [
+        ['noa.sketches', 'לפני יומיים', 'וואי איזה חתול מתוק 😍'],
+        ['itamar.g', 'לפני 5 ימים', 'החתול הזה כאוס מוחלט חחח'],
+        ['tamar_k', 'לפני שבועיים', 'גם החתולה שלי עושה בדיוק ככה'],
+        ['lior.draws', 'לפני שבועיים', 'זה חתול פרסי?'],
+      ],
+      right: [
+        ['aba_boneh', 'לפני יום', 'בנינו כזה עם הבן, וכבר ביום השני עברו לגור בו ציפורים 🐦'],
+        ['yarden.p', 'לפני 3 ימים', 'באיזה קוטר החור?'],
+        ['nagar_haifa', 'לפני 4 ימים', 'רק ברגים, לא מסמרים. תאמינו לי'],
+        ['hila.garden', 'לפני שבועיים', 'אנחנו צבענו את שלנו בצהוב, והילדים מתים עליו'],
+      ],
+      late: 'וואי איזה חתול מתוק 😍',
+      own: 'באיזה קוטר החור?',
+      s2Title: 'גללו מהר ככל שתרצו',
+      s2Sub: 'מה קורה כשעוברים לסרטון אחר לפני שהתגובות נטענו',
+      steps: [
+        'אתם עוברים לסרטון הבא בזמן שהתגובות של הקודם עדיין נטענות',
+        'YouTube מציג את התגובות שהתעכבו בסרטון החדש',
+        'התוסף טוען במקומן את התגובות ששייכות לסרטון שעל המסך',
+      ],
+      facts: ['פועל רק ב-youtube.com', 'לא אוסף שום מידע', 'אין מה להגדיר'],
+    },
+  };
+
+  const AVATARS = ['#F2A65A', '#6FA8DC', '#8CC985', '#D98CB3', '#A594E8', '#E2BE4F'];
+  let uid = 0;
+
+  const birdhouse = () => {
+    const id = `sky${uid++}`;
+    return `<svg viewBox="0 0 270 480" preserveAspectRatio="xMidYMid slice">
+      <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86CBE6"/><stop offset="1" stop-color="#E3F4FA"/></linearGradient></defs>
+      <rect width="270" height="480" fill="url(#${id})"/>
+      <circle cx="212" cy="86" r="30" fill="#FFE39A"/>
+      <path d="M0 356 Q70 318 140 346 T270 336 V480 H0Z" fill="#A9D9A1"/>
+      <path d="M0 398 Q90 366 170 392 T270 386 V480 H0Z" fill="#7BBE79"/>
+      <rect x="128" y="290" width="14" height="190" fill="#6E4428"/>
+      <rect x="84" y="196" width="102" height="106" rx="6" fill="#E3A465"/>
+      <path d="M74 206 L135 150 L196 206 Z" fill="#B5542F" stroke="#B5542F" stroke-width="10" stroke-linejoin="round"/>
+      <circle cx="135" cy="242" r="17" fill="#4B2A17"/>
+      <rect x="131" y="270" width="8" height="18" rx="3" fill="#6E4428"/>
+      <g transform="translate(172 150) rotate(-12)">
+        <ellipse cx="0" cy="0" rx="17" ry="12" fill="#FF7A59"/>
+        <circle cx="12" cy="-9" r="9" fill="#FF7A59"/>
+        <circle cx="15" cy="-11" r="2" fill="#2D0B14"/>
+        <path d="M20 -10 L28 -8 L20 -5 Z" fill="#F2B233"/>
+      </g>
+    </svg>`;
+  };
+
+  const cat = () => `<svg viewBox="0 0 270 480" preserveAspectRatio="xMidYMid slice">
+      <rect width="270" height="480" fill="#FFD7A3"/>
+      <ellipse cx="135" cy="410" rx="130" ry="46" fill="#F3A7A7"/>
+      <ellipse cx="135" cy="338" rx="84" ry="74" fill="#EF9446"/>
+      <path d="M72 206 L82 128 L122 168 H148 L188 128 L198 206 Q198 272 135 272 Q72 272 72 206 Z" fill="#EF9446"/>
+      <circle cx="111" cy="208" r="8" fill="#2D0B14"/>
+      <circle cx="159" cy="208" r="8" fill="#2D0B14"/>
+      <path d="M127 230 H143 L135 239 Z" fill="#D9534F"/>
+      <path d="M100 236 H68 M100 245 L70 254 M170 236 H202 M170 245 L200 254" stroke="#2D0B14" stroke-width="3" stroke-linecap="round"/>
+    </svg>`;
+
+  const ICON_HEART = '<svg viewBox="0 0 24 24"><path fill="#fff" d="M12 20.5 4.6 13.4A4.6 4.6 0 0 1 11.3 7L12 7.8l.7-.8a4.6 4.6 0 0 1 6.7 6.4Z"/></svg>';
+  const ICON_BUBBLE = '<svg viewBox="0 0 24 24"><path fill="#fff" d="M6 4h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H11l-4.5 3.5V18H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Z"/></svg>';
+  const ICON_X = '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 6l12 12M18 6 6 18" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg>';
+
+  const short = (t, art, extraClass = '') => `
+    <div class="short ${extraClass}">
+      ${art()}
+      <div class="shade"></div>
+      <div class="caption">
+        <div class="channel"><i></i><bdi>${t.channel}</bdi></div>
+        <p class="title">${t.shortTitle}</p>
+      </div>
+      <div class="actions"><i>${ICON_HEART}</i><i>${ICON_BUBBLE}</i></div>
+    </div>`;
+
+  const panel = (t, kind) => {
+    const list = kind === 'right' ? t.right : t.wrong;
+    const note = kind === 'right'
+      ? `<img src="icon.svg" alt="">${t.rightNote}`
+      : `${short(t, cat, 'mini')}${t.wrongNote}`;
+    return `
+      <div class="panel ${kind}">
+        <div class="panel-head">${t.comments}<span>${t.count}</span></div>
+        <ul class="comments">
+          ${list.map(([name, when, text], i) => `
+            <li class="comment">
+              <span class="avatar" style="background:${AVATARS[(i + (kind === 'right' ? 3 : 0)) % AVATARS.length]}">${name[0].toUpperCase()}</span>
+              <div><p class="meta"><bdi>@${name}</bdi><span>${when}</span></p><p class="text">${text}</p></div>
+            </li>`).join('')}
+        </ul>
+        <div class="note">${note}</div>
+      </div>`;
+  };
+
+  const FACT_ICONS = [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6Z"/><path d="m9 12 2 2 4-4"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>',
+  ];
+
+  const render = {
+    'screenshot-1': (t) => `
+      <section class="asset s1">
+        <header>
+          <h1 class="display">${t.s1Title}</h1>
+          <div class="lockup"><img src="icon.svg" alt="">${t.brand}</div>
+        </header>
+        <div class="stage">
+          <div><p class="state wrong">${t.without}</p>${panel(t, 'wrong')}</div>
+          <div class="link wrong"></div>
+          <div><p class="state"></p>${short(t, birdhouse)}</div>
+          <div class="link right"></div>
+          <div><p class="state right">${t.with}</p>${panel(t, 'right')}</div>
+        </div>
+      </section>`,
+
+    'screenshot-2': (t) => {
+      const prev = short(t, cat, 'mini prev');
+      const current = short(t, birdhouse, 'mini current');
+      const scenes = [
+        `${prev}${current}<div class="bubble loading"><i></i><i></i><i></i></div>
+         <svg class="trail" viewBox="0 0 352 350"><path d="M300 290 V150" stroke="#6E4A52" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M288 164 L300 148 L312 164" stroke="#6E4A52" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+        `${prev}${current}
+         <svg class="trail" viewBox="0 0 352 350"><path d="M246 70 C 304 110, 304 160, 262 200" stroke="#9A7F85" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round" fill="none"/></svg>
+         <div class="bubble late">${t.late}<span class="mark x">${ICON_X}</span></div>`,
+        `${prev}${current}<div class="bubble own">${t.own}<img class="mark" src="icon.svg" alt=""></div>`,
+      ];
+      return `
+        <section class="asset s2">
+          <header>
+            <div><h1 class="display">${t.s2Title}</h1><p class="sub">${t.s2Sub}</p></div>
+            <div class="lockup"><img src="icon.svg" alt="">${t.brand}</div>
+          </header>
+          <div class="steps">
+            ${scenes.map((scene, i) => `
+              <div class="step">
+                <div class="scene">${scene}</div>
+                <p class="num display">${t.stepNumbers?.[i] ?? i + 1}</p>
+                <p>${t.steps[i]}</p>
+              </div>`).join('')}
+          </div>
+          <div class="facts">${t.facts.map((fact, i) => `<span>${FACT_ICONS[i]}${fact}</span>`).join('')}</div>
+        </section>`;
+    },
+
+    'promo-small': (t) => `
+      <section class="asset promo-small">
+        <img src="icon.svg" alt="">
+        <div><h2 class="display">${t.brand}</h2><p class="tagline">${t.tagline}</p></div>
+      </section>`,
+
+    'promo-marquee': (t) => `
+      <section class="asset promo-marquee">
+        <div class="lockup"><img src="icon.svg" alt="">${t.brand}</div>
+        <h2 class="display">${t.marquee}</h2>
+        <p class="tagline">${t.marqueeSub}</p>
+        <div class="stage">
+          ${short(t, birdhouse)}
+          <div class="link right"></div>
+          ${panel(t, 'right')}
+        </div>
+      </section>`,
+  };
+
+  const params = new URLSearchParams(location.search);
+  const lang = COPY[params.get('lang')] ? params.get('lang') : 'en';
+  const asset = render[params.get('asset')] ? params.get('asset') : 'screenshot-1';
+  document.documentElement.lang = lang.replace('_', '-');
+  document.documentElement.dir = ['ar', 'he'].includes(lang) ? 'rtl' : 'ltr';
+  document.getElementById('root').innerHTML = render[asset](COPY[lang]);
+</script>
+</body>
+</html>

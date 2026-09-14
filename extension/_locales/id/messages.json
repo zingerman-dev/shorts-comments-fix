@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Shorts Comments Fix untuk YouTube",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "Menjaga komentar YouTube Shorts tetap sesuai dengan video di layar, bahkan saat Anda menggulir dengan cepat.",
+    "description": "Short description, at most 132 characters."
+  }
+}

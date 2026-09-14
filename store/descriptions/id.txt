@@ -1,0 +1,14 @@
+Menonton YouTube Shorts di komputer dengan panel komentar terbuka? Jika Anda menggulir sedikit terlalu cepat, panel bisa menampilkan komentar dari video Shorts lain, mencampur komentar beberapa video Shorts, atau terus menampilkan komentar yang salah setiap kali Anda kembali ke video Shorts tersebut.
+
+Shorts Comments Fix menjaga panel komentar tetap sesuai dengan video Shorts yang sedang Anda tonton.
+
+Cara kerjanya
+YouTube memuat komentar di latar belakang. Jika Anda pindah ke video Shorts lain sebelum komentar tiba, YouTube memasukkan komentar yang terlambat itu ke video Shorts yang sedang terbuka. Ekstensi ini mendeteksi komentar yang datang untuk video Shorts yang sudah Anda tinggalkan, lalu memuat komentar video Shorts yang sedang ditonton sebagai gantinya.
+
+• Juga memunculkan kembali tombol suka dan komentar jika tombol tersebut hilang setelah Anda menggulir dengan sangat cepat.
+• Bekerja otomatis, tidak ada yang perlu diatur.
+• Hanya berjalan di youtube.com dan hanya memengaruhi Shorts.
+• Tidak mengumpulkan data apa pun. Ekstensi ini hanya berkomunikasi dengan YouTube, sama seperti halaman YouTube itu sendiri.
+• Jika YouTube mengubah sesuatu yang tidak dikenali ekstensi, ekstensi tidak ikut campur dan YouTube berjalan seperti biasa.
+
+Ekstensi ini tidak berafiliasi dengan YouTube atau Google dan tidak didukung oleh keduanya.

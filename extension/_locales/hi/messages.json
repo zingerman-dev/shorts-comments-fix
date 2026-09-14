@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "YouTube के लिए Shorts Comments Fix",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "तेज़ी से स्क्रॉल करने पर भी YouTube Shorts के टिप्पणी पैनल में स्क्रीन पर चल रहे Short की ही टिप्पणियाँ दिखाता है।",
+    "description": "Short description, at most 132 characters."
+  }
+}

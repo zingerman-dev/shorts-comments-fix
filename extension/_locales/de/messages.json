@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Shorts Comments Fix für YouTube",
+    "description": "Extension name shown in Chrome and in the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "Sorgt dafür, dass der Kommentarbereich in YouTube Shorts zum gerade angezeigten Short passt, auch wenn du schnell scrollst.",
+    "description": "Short description, at most 132 characters."
+  }
+}
