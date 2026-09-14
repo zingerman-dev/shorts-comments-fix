@@ -23,8 +23,10 @@
   'use strict';
 
   const COMMENTS_TARGET_ID = 'shorts-engagement-panel-comments-section';
+  // Inside Shorts only: a watch page opened earlier in the same tab leaves its
+  // own hidden comments panel (for another video) in the document.
   const PANEL_SELECTOR =
-    'ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-comments-section"]';
+    'ytd-shorts ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-comments-section"]';
   const MAX_RELOADS = 5;
 
   let debug = false;

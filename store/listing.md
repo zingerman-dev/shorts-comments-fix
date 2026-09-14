@@ -55,7 +55,7 @@ The extension has to run on www.youtube.com to see YouTube's own comment request
 
 **Are you using remote code?** No, I am not using remote code.
 
-**Data usage:** tick none of the data types. Tick all three certifications (no selling or transferring data, no use unrelated to the single purpose, no use for creditworthiness or lending).
+**Data usage:** tick **Website content** and **User activity**, nothing else. The extension reads YouTube's comment responses and watches the page's comment requests, only inside the page, and the store asks to disclose data handled locally too. Tick all three certifications (no selling or transferring data, no use unrelated to the single purpose, no use for creditworthiness or lending).
 
 **Privacy policy URL:** https://github.com/zingerman-dev/shorts-comments-fix/blob/main/PRIVACY.md
 
