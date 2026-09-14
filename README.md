@@ -60,7 +60,7 @@ store/
   src/            sources: icon SVGs and the HTML template for the graphics
 scripts/          graphics rendering and packaging
 tests/            end-to-end check in headless Chrome
-PRIVACY.md        privacy policy
+PRIVACY.md        privacy policy in 13 languages
 ```
 
 ## Development install
