@@ -317,6 +317,9 @@
   }
 
   let stuckChecks = 0;
+  // A page that stays stuck through a few passes is waiting on something else
+  // (a slow YouTube response), so stop until it recovers or the address changes.
+  let repairs = { path: null, count: 0 };
   setInterval(() => {
     if (!location.pathname.startsWith('/shorts/')) return;
     try {
@@ -326,9 +329,15 @@
     }
     if (unstickDisabled()) return;
     try {
-      stuckChecks = isStuck() ? stuckChecks + 1 : 0;
-      if (stuckChecks < 2) return;
+      if (!isStuck()) {
+        stuckChecks = 0;
+        repairs = { path: null, count: 0 };
+        return;
+      }
+      if (repairs.path !== location.pathname) repairs = { path: location.pathname, count: 0 };
+      if (++stuckChecks < 2 || repairs.count >= 3) return;
       stuckChecks = -2; // let the repair settle before checking again
+      repairs.count++;
       log(runSchedulerIdlePass()
         ? 'page got stuck after a fast flip: ran the work YouTube had queued'
         : 'page got stuck after a fast flip, but the scheduler was not recognised');

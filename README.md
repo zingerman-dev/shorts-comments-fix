@@ -41,7 +41,7 @@ On `/shorts/` pages the extension wraps `fetch`. When a comments response arrive
 
 If anything can't be recognised (say, YouTube changed the format), the response passes through unchanged, so nothing gets worse than YouTube's own behaviour.
 
-For the vanishing buttons, the extension checks the Shorts page once a second. If navigation has finished but the button layer is still hidden or the comments panel belongs to another short, two checks in a row, it runs one idle pass of YouTube's scheduler. That runs exactly the work YouTube itself had queued. If the scheduler can't be recognised, the extension does nothing.
+For the vanishing buttons, the extension checks the Shorts page once a second. If navigation has finished but the button layer is still hidden or the comments panel belongs to another short, two checks in a row, it runs one idle pass of YouTube's scheduler. That runs exactly the work YouTube itself had queued. If the scheduler can't be recognised, the extension does nothing. A page still stuck after three passes is waiting on something else, such as a slow YouTube response, so the extension leaves it alone until it recovers or moves to another short.
 
 For comments that never show up, the same once-a-second check looks at the open panel. If its first loader is still there 1.5 seconds after YouTube got an answer for it, the extension runs one idle pass of the scheduler. If the loader survives that, or nothing has asked for its comments (a request gets 15 seconds), the extension fires the loader the way YouTube does, at most twice per short.
 
